@@ -64,6 +64,8 @@ export default {
     operation: '操作',
     addEmoticon: '添加表情',
     emoticonFileTooLarge: '文件尺寸太大，最大1MB',
+    emoticonPreview: '表情预览',
+    updateEmoticon: '刷新',
 
     urlTooLong: '房间URL太长了，会被直播姬截断（OBS不会）',
     roomUrlUpdated: '房间URL已更新，记得重新复制',

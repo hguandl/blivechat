@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import asyncio
+import csv
 import hashlib
+import json
 import logging
 import os
 
@@ -100,6 +102,25 @@ class UploadEmoticonHandler(api.base.ApiHandler):
         return f'{EMOTICON_BASE_URL}/{filename}'
 
 
+class EmoticonListHandler(api.base.ApiHandler):
+    async def get(self):
+        emoticons_path = os.path.join(config.DATA_PATH, 'emoticons.csv')
+        if not os.path.exists(emoticons_path):
+            raise tornado.web.HTTPError(404)
+
+        emoticons = []
+
+        with open(emoticons_path, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                emoticons.append({
+                    'keyword': row[0],
+                    'url': f'{EMOTICON_BASE_URL}/{row[1]}'
+                })
+
+        self.write(json.dumps(emoticons))
+
+
 class NoCacheStaticFileHandler(tornado.web.StaticFileHandler):
     def set_extra_headers(self, path):
         self.set_header('Cache-Control', 'no-cache')
@@ -110,6 +131,7 @@ ROUTES = [
     (r'/api/endpoints', ServiceDiscoveryHandler),
     (r'/api/ping', PingHandler),
     (r'/api/emoticon', UploadEmoticonHandler),
+    (r'/api/emoticons', EmoticonListHandler),
 ]
 # 通配的放在最后
 LAST_ROUTES = [

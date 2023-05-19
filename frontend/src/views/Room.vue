@@ -111,7 +111,7 @@ export default {
       this.init()
     },
     async init() {
-      this.initConfig()
+      await this.initConfig()
 
       let initChatClientPromise = this.initChatClient()
       this.initTextEmoticons()
@@ -145,7 +145,7 @@ export default {
 
       this.sendMessageToStylegen('stylegenExampleRoomLoad')
     },
-    initConfig() {
+    async initConfig() {
       let locale = this.strConfig.lang
       if (locale) {
         i18n.setLocale(locale)
@@ -179,7 +179,7 @@ export default {
       cfg.autoTranslate = toBool(cfg.autoTranslate)
       cfg.importPresetCss = toBool(cfg.importPresetCss)
 
-      cfg.emoticons = this.toObjIfJson(cfg.emoticons)
+      cfg.emoticons = await (await fetch('/api/emoticons')).json()
 
       chatConfig.sanitizeConfig(cfg)
       this.config = cfg
