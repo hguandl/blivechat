@@ -318,6 +318,7 @@ export default {
       try {
         // 其他初始化就不用等了，就算失败了也不会有很大影响
         await initChatClientPromise
+        await this.initServerEmoticons()
       } catch (e) {
         this.$message.error({
           message: `Failed to load: ${e}`,
@@ -369,7 +370,7 @@ export default {
       cfg.autoTranslate = toBool(cfg.autoTranslate)
       cfg.importPresetCss = toBool(cfg.importPresetCss)
 
-      cfg.emoticons = this.toObjIfJson(cfg.emoticons)
+      cfg.emoticons = []
 
       chatConfig.sanitizeConfig(cfg)
       this.config = cfg
@@ -407,6 +408,9 @@ export default {
 
       this.chatClient.msgHandler = this
       this.chatClient.start()
+    },
+    async initServerEmoticons() {
+      this.config.emoticons = await (await fetch('/api/emoticons')).json()
     },
     async initTextEmoticons() {
       this.textEmoticons = await chat.getTextEmoticons()

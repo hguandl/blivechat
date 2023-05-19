@@ -10,6 +10,10 @@ export async function uploadEmoticon(file) {
   return (await axios.post('/api/emoticon', body)).data
 }
 
+export async function getEmoticons() {
+  return (await axios.get('/api/emoticons')).data
+}
+
 export async function getTemplates() {
   return (await axios.get('/api/templates')).data
 }
