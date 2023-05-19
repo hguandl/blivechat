@@ -118,10 +118,14 @@ export default {
 
       cfg.relayMessagesByServer = toBool(cfg.relayMessagesByServer)
       cfg.autoTranslate = toBool(cfg.autoTranslate)
-      cfg.emoticons = this.toObjIfJson(cfg.emoticons)
 
-      chatConfig.sanitizeConfig(cfg)
-      this.config = cfg
+      fetch('/api/emoticons')
+        .then(res => res.json())
+        .then(data => {
+          cfg.emoticons = data
+          chatConfig.sanitizeConfig(cfg)
+          this.config = cfg
+        })
     },
     toObjIfJson(str) {
       if (typeof str !== 'string') {

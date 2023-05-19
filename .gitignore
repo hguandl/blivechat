@@ -111,3 +111,7 @@ data/*
 data/emoticons/*
 !data/emoticons/.gitkeep
 log/*
+
+# emoticons example
+!data/emoticons.csv
+!data/emoticons/寄.jpg
