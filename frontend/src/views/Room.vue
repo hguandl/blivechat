@@ -67,8 +67,8 @@ export default {
       return res
     }
   },
-  mounted() {
-    this.initConfig()
+  async mounted() {
+    await this.initConfig()
     this.initChatClient()
     if (this.config.giftUsernamePronunciation !== '') {
       this.pronunciationConverter = new pronunciation.PronunciationConverter()
@@ -87,7 +87,7 @@ export default {
     }
   },
   methods: {
-    initConfig() {
+    async initConfig() {
       let locale = this.strConfig.lang
       if (locale) {
         i18n.setLocale(locale)
@@ -118,7 +118,7 @@ export default {
 
       cfg.relayMessagesByServer = toBool(cfg.relayMessagesByServer)
       cfg.autoTranslate = toBool(cfg.autoTranslate)
-      cfg.emoticons = this.toObjIfJson(cfg.emoticons)
+      cfg.emoticons = await (await fetch('/api/emoticons')).json()
 
       chatConfig.sanitizeConfig(cfg)
       this.config = cfg

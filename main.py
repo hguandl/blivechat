@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 routes = [
     (r'/api/server_info', api.main.ServerInfoHandler),
     (r'/api/emoticon', api.main.UploadEmoticonHandler),
+    (r'/api/emoticons', api.main.EmoticonListHandler),
 
     (r'/api/chat', api.chat.ChatHandler),
     (r'/api/room_info', api.chat.RoomInfoHandler),

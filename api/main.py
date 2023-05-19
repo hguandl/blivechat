@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import asyncio
+import csv
 import hashlib
+import json
 import logging
 import os
 
@@ -76,3 +78,22 @@ class UploadEmoticonHandler(api.base.ApiHandler):  # noqa
         os.replace(tmp_path, path)
 
         return f'{EMOTICON_BASE_URL}/{filename}'
+
+
+class EmoticonListHandler(api.base.ApiHandler):  # noqa
+    async def get(self):
+        emoticons_path = os.path.join(config.DATA_PATH, 'emoticons.csv')
+        if not os.path.exists(emoticons_path):
+            raise tornado.web.HTTPError(404)
+
+        emoticons = []
+
+        with open(emoticons_path, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                emoticons.append({
+                    'keyword': row[0],
+                    'url': f'{EMOTICON_BASE_URL}/{row[1]}'
+                })
+
+        self.write(json.dumps(emoticons))

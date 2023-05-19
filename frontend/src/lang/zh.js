@@ -44,6 +44,8 @@ export default {
     operation: '操作',
     addEmoticon: '添加表情',
     emoticonFileTooLarge: '文件尺寸太大，最大1MB',
+    emoticonPreview: '表情预览',
+    updateEmoticon: '刷新',
 
     roomUrl: '房间URL',
     enterRoom: '进入房间',
