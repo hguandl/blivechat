@@ -32,6 +32,7 @@ jobs:
             --add-data="log;log" `
             --add-data="frontend\dist;frontend\dist" `
             --name blivechat `
+            --noconsole `
             main.py
 
       - name: Package Bundle
