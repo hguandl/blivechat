@@ -1,0 +1,45 @@
+name: Release Bundled Package
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Build Frontend
+        env:
+          NODE_OPTIONS: "--openssl-legacy-provider"
+        working-directory: frontend
+        run: |
+          npm install
+          npm run build
+      
+      - name: Export Backend
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+          pyinstaller --noconfirm `
+            --add-data="data;data" `
+            --add-data="log;log" `
+            --add-data="frontend\dist;frontend\dist" `
+            --name blivechat `
+            main.py
+
+      - name: Package Bundle
+        working-directory: dist
+        run: 7z a -tzip blivechat.zip blivechat
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: dist/blivechat.zip
