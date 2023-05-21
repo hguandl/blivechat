@@ -119,27 +119,22 @@
             <el-table :data="form.emoticons">
               <el-table-column prop="keyword" :label="$t('home.emoticonKeyword')" width="170">
                 <template slot-scope="scope">
-                  <el-input v-model="scope.row.keyword"></el-input>
+                  {{ scope.row.keyword }}
                 </template>
               </el-table-column>
               <el-table-column prop="url" :label="$t('home.emoticonUrl')">
                 <template slot-scope="scope">
-                  <el-input v-model="scope.row.url"></el-input>
+                  {{ scope.row.url }}
                 </template>
               </el-table-column>
-              <el-table-column :label="$t('home.operation')" width="170">
+              <el-table-column :label="$t('home.emoticonPreview')" width="300">
                 <template slot-scope="scope">
-                  <el-button-group>
-                    <el-button type="primary" icon="el-icon-upload2" :disabled="!serverConfig.enableUploadFile"
-                      @click="uploadEmoticon(scope.row)"
-                    ></el-button>
-                    <el-button type="danger" icon="el-icon-minus" @click="delEmoticon(scope.$index)"></el-button>
-                  </el-button-group>
+                  <el-image style="height: 40px" :src="scope.row.url" :fit="fit"></el-image>
                 </template>
               </el-table-column>
             </el-table>
             <p>
-              <el-button type="primary" icon="el-icon-plus" @click="addEmoticon">{{$t('home.addEmoticon')}}</el-button>
+              <el-button type="primary" icon="el-icon-refresh-right" @click="updateEmoticon">{{$t('home.updateEmoticon')}}</el-button>
             </p>
           </el-tab-pane>
         </el-tabs>
@@ -212,6 +207,7 @@ export default {
   },
   mounted() {
     this.updateServerConfig()
+    this.updateEmoticon()
   },
   methods: {
     async updateServerConfig() {
@@ -272,6 +268,7 @@ export default {
         lang: this.$i18n.locale
       }
       delete query.roomId
+      delete query.emoticons
 
       let resolved
       if (isTestRoom) {
@@ -315,6 +312,14 @@ export default {
       this.form = {
         ...cfg,
         roomId: this.form.roomId
+      }
+    },
+    async updateEmoticon() {
+      try {
+        this.form.emoticons = await mainApi.getEmoticons()
+      } catch (e) {
+        this.$message.error(`Failed to update emoticons: ${e}`)
+        throw e
       }
     }
   }
