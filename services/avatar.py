@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import datetime
+import hashlib
 import logging
 import re
 from typing import *
@@ -147,20 +148,22 @@ async def _get_avatar_url_from_web_coroutine(user_id, future):
 
 async def _do_get_avatar_url_from_web(user_id):
     try:
+        params = {
+            'mid': user_id,
+            'token': '',
+            'platform': 'web',
+            'web_location': '1550101',
+            'wts': int(datetime.datetime.now().timestamp()),
+        }
         async with utils.request.http_session.get(
-            'https://api.bilibili.com/x/space/acc/info',
+            'https://api.bilibili.com/x/space/wbi/acc/info',
             headers={
                 **utils.request.BILIBILI_COMMON_HEADERS,
                 'Origin': 'https://space.bilibili.com',
                 'Referer': f'https://space.bilibili.com/{user_id}/'
             },
             cookies=utils.request.BILIBILI_COMMON_COOKIES,
-            params={
-                'mid': user_id,
-                'token': '',
-                'platform': 'web',
-                'jsonp': 'jsonp'
-            }
+            params=_get_signed_params(params)
         ) as r:
             if r.status != 200:
                 logger.warning('Failed to fetch avatar: status=%d %s uid=%d', r.status, r.reason, user_id)
@@ -227,3 +230,11 @@ def _update_avatar_cache_in_database(user_id, avatar_url):
         pass
     except sqlalchemy.exc.SQLAlchemyError:
         logger.exception('_update_avatar_cache_in_database failed:')
+
+
+def _get_signed_params(params):
+    padding = '72136226c6a73669787ee4fd02a74c27'
+    payload = '&'.join([f'{k}={params[k]}' for k in sorted(params.keys())])
+    w_rid = hashlib.md5(f'{payload}{padding}'.encode()).hexdigest()
+    params['w_rid'] = w_rid
+    return params
