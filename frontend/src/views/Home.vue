@@ -129,7 +129,7 @@
               </el-table-column>
               <el-table-column :label="$t('home.emoticonPreview')" width="300">
                 <template slot-scope="scope">
-                  <el-image style="height: 40px" :src="scope.row.url" :fit="fit"></el-image>
+                  <img style="max-height: 40px" :src="scope.row.url">
                 </template>
               </el-table-column>
             </el-table>
