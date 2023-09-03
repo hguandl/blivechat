@@ -66,7 +66,12 @@ class LiveClient(blivedm.BLiveClient):
     HEARTBEAT_INTERVAL = 10
 
     def __init__(self, room_id):
-        super().__init__(room_id, session=utils.request.http_session, heartbeat_interval=self.HEARTBEAT_INTERVAL)
+        cfg = config.get_config()
+        super().__init__(room_id, uid=cfg.uid,
+                         session=utils.request.http_session,
+                         heartbeat_interval=self.HEARTBEAT_INTERVAL,
+                         buvid=cfg.buvid,
+                         sessdata=cfg.sessdata)
 
     @property
     def tmp_room_id(self):
