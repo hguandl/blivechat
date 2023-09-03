@@ -63,6 +63,7 @@ def make_text_message_data(
     translation: str = '',
     content_type: int = ContentType.TEXT,
     content_type_params: list = None,
+    text_emoticons: Iterable[Tuple[str, str]] = None
 ):
     # 为了节省带宽用list而不是dict
     return [
@@ -96,6 +97,8 @@ def make_text_message_data(
         content_type,
         # 14: contentTypeParams
         content_type_params if content_type_params is not None else [],
+        # 15: textEmoticons
+        text_emoticons if text_emoticons is not None else [],
     ]
 
 
@@ -129,21 +132,21 @@ class ChatHandler(tornado.websocket.WebSocketHandler):  # noqa
 
     def open(self):
         logger.info('client=%s connected', self.request.remote_ip)
-        self._heartbeat_timer_handle = asyncio.get_event_loop().call_later(
+        self._heartbeat_timer_handle = asyncio.get_running_loop().call_later(
             self.HEARTBEAT_INTERVAL, self._on_send_heartbeat
         )
         self._refresh_receive_timeout_timer()
 
     def _on_send_heartbeat(self):
         self.send_cmd_data(Command.HEARTBEAT, {})
-        self._heartbeat_timer_handle = asyncio.get_event_loop().call_later(
+        self._heartbeat_timer_handle = asyncio.get_running_loop().call_later(
             self.HEARTBEAT_INTERVAL, self._on_send_heartbeat
         )
 
     def _refresh_receive_timeout_timer(self):
         if self._receive_timeout_timer_handle is not None:
             self._receive_timeout_timer_handle.cancel()
-        self._receive_timeout_timer_handle = asyncio.get_event_loop().call_later(
+        self._receive_timeout_timer_handle = asyncio.get_running_loop().call_later(
             self.RECEIVE_TIMEOUT, self._on_receive_timeout
         )
 
@@ -165,15 +168,13 @@ class ChatHandler(tornado.websocket.WebSocketHandler):  # noqa
 
     def on_message(self, message):
         try:
-            # 超时没有加入房间也断开
-            if self.has_joined_room:
-                self._refresh_receive_timeout_timer()
-
             body = json.loads(message)
             cmd = body['cmd']
 
             if cmd == Command.HEARTBEAT:
-                pass
+                # 超时没有加入房间也断开
+                if self.has_joined_room:
+                    self._refresh_receive_timeout_timer()
 
             elif cmd == Command.JOIN_ROOM:
                 if self.has_joined_room:
@@ -189,7 +190,7 @@ class ChatHandler(tornado.websocket.WebSocketHandler):  # noqa
                     pass
 
                 services.chat.client_room_manager.add_client(self.room_id, self)
-                asyncio.ensure_future(self._on_joined_room())
+                asyncio.create_task(self._on_joined_room())
 
             else:
                 logger.warning('client=%s unknown cmd=%d, body=%s', self.request.remote_ip, cmd, body)
@@ -265,10 +266,15 @@ class ChatHandler(tornado.websocket.WebSocketHandler):  # noqa
             'translation': ''
         }
         self.send_cmd_data(Command.ADD_TEXT, text_data)
+        text_data[4] = 'te[dog]st'
+        text_data[11] = uuid.uuid4().hex
+        text_data[15] = [('[dog]', 'http://i0.hdslb.com/bfs/live/4428c84e694fbf4e0ef6c06e958d9352c3582740.png')]
+        self.send_cmd_data(Command.ADD_TEXT, text_data)
         text_data[2] = '主播'
         text_data[3] = 3
         text_data[4] = "I can eat glass, it doesn't hurt me."
         text_data[11] = uuid.uuid4().hex
+        text_data[15] = []
         self.send_cmd_data(Command.ADD_TEXT, text_data)
         self.send_cmd_data(Command.ADD_MEMBER, member_data)
         self.send_cmd_data(Command.ADD_SUPER_CHAT, sc_data)

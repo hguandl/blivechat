@@ -16,6 +16,7 @@ import services.avatar
 import services.chat
 import services.translate
 import update
+import utils.request
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ routes = [
     (r'/api/avatar_url', api.chat.AvatarHandler),
 
     (rf'{api.main.EMOTICON_BASE_URL}/(.*)', tornado.web.StaticFileHandler, {'path': api.main.EMOTICON_UPLOAD_PATH}),
-    (r'/(.*)', api.main.MainHandler, {'path': config.WEB_ROOT, 'default_filename': 'index.html'})
+    (r'/(.*)', api.main.MainHandler, {'path': config.WEB_ROOT})
 ]
 
 
@@ -38,10 +39,14 @@ def main():
 
     init_logging(args.debug)
     config.init()
+
+    utils.request.init()
     models.database.init(args.debug)
+
     services.avatar.init()
     services.translate.init()
     services.chat.init()
+
     update.check_update()
 
     run_server(args.host, args.port, args.debug)
@@ -49,8 +54,8 @@ def main():
 
 def parse_args():
     parser = argparse.ArgumentParser(description='用于OBS的仿YouTube风格的bilibili直播评论栏')
-    parser.add_argument('--host', help='服务器host，默认为127.0.0.1', default='127.0.0.1')
-    parser.add_argument('--port', help='服务器端口，默认为12450', type=int, default=12450)
+    parser.add_argument('--host', help='服务器host，默认和配置中的一样', default=None)
+    parser.add_argument('--port', help='服务器端口，默认和配置中的一样', type=int, default=None)
     parser.add_argument('--debug', help='调试模式', action='store_true')
     return parser.parse_args()
 
@@ -63,7 +68,6 @@ def init_logging(debug):
     )
     logging.basicConfig(
         format='{asctime} {levelname} [{name}]: {message}',
-        datefmt='%Y-%m-%d %H:%M:%S',
         style='{',
         level=logging.INFO if not debug else logging.DEBUG,
         handlers=[stream_handler, file_handler]
@@ -74,13 +78,18 @@ def init_logging(debug):
 
 
 def run_server(host, port, debug):
+    cfg = config.get_config()
+    if host is None:
+        host = cfg.host
+    if port is None:
+        port = cfg.port
+
     app = tornado.web.Application(
         routes,
         websocket_ping_interval=10,
         debug=debug,
         autoreload=False
     )
-    cfg = config.get_config()
     try:
         app.listen(
             port,
@@ -93,10 +102,9 @@ def run_server(host, port, debug):
         logger.warning('Address is used %s:%d', host, port)
         return
     finally:
-        url = 'http://localhost/' if port == 80 else f'http://localhost:{port}/'
-        # 防止更新版本后浏览器加载缓存
-        url += '?_v=' + update.VERSION
-        webbrowser.open(url)
+        if cfg.open_browser_at_startup:
+            url = 'http://localhost/' if port == 80 else f'http://localhost:{port}/'
+            webbrowser.open(url)
     logger.info('Server started: %s:%d', host, port)
     tornado.ioloop.IOLoop.current().start()
 

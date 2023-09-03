@@ -99,11 +99,11 @@ export default class ChatClientRelay {
   }
 
   onWsMessage(event) {
-    this.refreshReceiveTimeoutTimer()
-
     let { cmd, data } = JSON.parse(event.data)
     switch (cmd) {
     case COMMAND_HEARTBEAT: {
+      this.refreshReceiveTimeoutTimer()
+
       // 不能由定时器触发发心跳包，因为浏览器会把不活动页面的定时器调到1分钟以上
       this.websocket.send(JSON.stringify({
         cmd: COMMAND_HEARTBEAT
@@ -136,7 +136,8 @@ export default class ChatClientRelay {
         medalLevel: data[10],
         id: data[11],
         translation: data[12],
-        emoticon: emoticon
+        emoticon: emoticon,
+        textEmoticons: data[15],
       }
       this.onAddText(data)
       break

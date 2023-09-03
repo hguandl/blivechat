@@ -183,7 +183,6 @@ export default class ChatClientDirect {
   }
 
   onWsMessage(event) {
-    this.refreshReceiveTimeoutTimer()
     if (!(event.data instanceof ArrayBuffer)) {
       console.warn('未知的websocket消息类型，data=', event.data)
       return
@@ -226,6 +225,7 @@ export default class ChatClientDirect {
     }
     case OP_HEARTBEAT_REPLY: {
       // 服务器心跳包，包含人气值，这里没用
+      this.refreshReceiveTimeoutTimer()
       break
     }
     default: {
@@ -322,6 +322,8 @@ export default class ChatClientDirect {
       authorType = 0
     }
 
+    let textEmoticons = this.parseTextEmoticons(info)
+
     let data = {
       avatarUrl: await avatar.getAvatarUrl(uid),
       timestamp: info[0][4] / 1000,
@@ -336,9 +338,24 @@ export default class ChatClientDirect {
       medalLevel: roomId === this.roomId ? medalLevel : 0,
       id: getUuid4Hex(),
       translation: '',
-      emoticon: info[0][13].url || null
+      emoticon: info[0][13].url || null,
+      textEmoticons: textEmoticons,
     }
     this.onAddText(data)
+  }
+
+  parseTextEmoticons(info) {
+    try {
+      let modeInfo = info[0][15]
+      let extra = JSON.parse(modeInfo.extra)
+      if (!extra.emots) {
+        return []
+      }
+      let res = Object.values(extra.emots).map(emoticon => [emoticon.descript, emoticon.url])
+      return res
+    } catch {
+      return []
+    }
   }
 
   sendGiftCallback(command) {
