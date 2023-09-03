@@ -98,6 +98,11 @@ class AppConfig:
         self.translate_max_queue_size = app_section.getint('translate_max_queue_size', self.translate_max_queue_size)
         self.translation_cache_size = app_section.getint('translation_cache_size', self.translation_cache_size)
 
+        bili_section = config['bilibili']
+        self.uid = bili_section.getint('uid', fallback=0)
+        self.buvid = bili_section.get('buvid', fallback='')
+        self.sessdata = bili_section.get('sessdata', fallback='')
+
     def _load_translator_configs(self, config: configparser.ConfigParser):
         app_section = config['app']
         section_names = _str_to_list(app_section.get('translator_configs', ''))
