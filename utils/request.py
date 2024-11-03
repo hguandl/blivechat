@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import datetime
+import json
 import logging
+import os
 from typing import *
 
 import aiohttp
@@ -51,6 +53,20 @@ def init():
 async def shut_down():
     if http_session is not None:
         await http_session.close()
+
+
+def cookie_session() -> aiohttp.ClientSession:
+    cookie_file = os.path.join(config.DATA_PATH, 'cookies.json')
+    if os.path.exists(cookie_file):
+        cookies = {}
+        with open(cookie_file, 'r') as f:
+            for entry in json.load(f)['cookie_info']['cookies']:
+                cookies[entry['name']] = entry['value']
+        return aiohttp.ClientSession(
+            cookies=cookies, timeout=aiohttp.ClientTimeout(total=10)
+        )
+    else:
+        return aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10))
 
 
 class CustomClientResponse(aiohttp.ClientResponse):
