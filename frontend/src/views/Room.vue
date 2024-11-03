@@ -410,7 +410,9 @@ export default {
       this.chatClient.start()
     },
     async initServerEmoticons() {
-      this.config.emoticons = await (await fetch('/api/emoticons')).json()
+      if (this.roomKeyType === 1 && this.roomKeyValue === 4588774) {
+        this.config.emoticons = await (await fetch('/api/emoticons')).json()
+      }
     },
     async initTextEmoticons() {
       this.textEmoticons = await chat.getTextEmoticons()
