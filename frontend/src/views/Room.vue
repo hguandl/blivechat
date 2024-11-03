@@ -181,6 +181,12 @@ export default {
 
       cfg.emoticons = await (await fetch('/api/emoticons')).json()
 
+      if (this.roomKeyType === 1 && this.roomKeyValue === 4588774) {
+        cfg.emoticons = await (await fetch('/api/emoticons')).json()
+      } else {
+        cfg.emoticons = []
+      }
+
       chatConfig.sanitizeConfig(cfg)
       this.config = cfg
     },
