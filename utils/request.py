@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import datetime
+import json
 import logging
 import os
 import pickle
@@ -16,6 +17,8 @@ import utils.async_io
 logger = logging.getLogger(__name__)
 
 COOKIE_JAR_PATH = os.path.join(config.DATA_PATH, 'cookie_jar.pickle')
+
+COOKIE_JSON_PATH = os.path.join(config.DATA_PATH, 'cookies.json')
 
 # 不带这堆头部有时候也能成功请求，但是带上后成功的概率更高
 BILIBILI_COMMON_HEADERS = {
@@ -47,10 +50,19 @@ def init():
     except (OSError, pickle.PickleError):
         cookie_jar = None
 
+    try:
+        cookies = {}
+        with open(COOKIE_JSON_PATH, 'r') as f:
+            for entry in json.load(f)['cookie_info']['cookies']:
+                cookies[entry['name']] = entry['value']
+    except (OSError, json.JSONDecodeError):
+        cookies = None
+
     global http_session
     http_session = aiohttp.ClientSession(
         response_class=CustomClientResponse,
         timeout=aiohttp.ClientTimeout(total=10),
+        cookies=cookies,
         cookie_jar=cookie_jar,
     )
 
