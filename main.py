@@ -24,7 +24,6 @@ import services.chat
 import services.open_live
 import services.plugin
 import services.translate
-import update
 import utils.request
 
 logger = logging.getLogger(__name__)
@@ -77,7 +76,6 @@ def init():
 
     services.plugin.init()
 
-    update.check_update()
     return True
 
 
