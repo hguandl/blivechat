@@ -6,6 +6,22 @@ import ChatClientOfficialBase from './ChatClientOfficialBase'
 
 const GAME_HEARTBEAT_INTERVAL = 20 * 1000
 
+const CSZDCR_ADMIN_UNAMES = [
+  '进修小超人',
+  '露白-熬夜社畜版',
+  '夏沐蝉风',
+  'wuya-official',
+  '百里聿',
+  '松烟点茶HQ',
+  '浅若の清风',
+  '皮断腿的坑坑',
+  'EpicMorph',
+  '不是阿枯的岳母',
+  '我的学案不见啦',
+  'NaagisAA',
+  'NOEL_Mantra观测者',
+]
+
 export default class ChatClientDirectOpenLive extends ChatClientOfficialBase {
   constructor(roomOwnerAuthCode) {
     super()
@@ -237,6 +253,10 @@ export default class ChatClientDirectOpenLive extends ChatClientOfficialBase {
       authorType = 1
     } else {
       authorType = 0
+    }
+
+    if (CSZDCR_ADMIN_UNAMES.includes(data.uname)) {
+      authorType = 2
     }
 
     let emoticon = null
