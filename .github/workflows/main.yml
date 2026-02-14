@@ -1,8 +1,10 @@
 name: Bundle with Pyinstaller
 on:
   push:
-    branches: '*'
-    tags: 'v*'
+    branches:
+      - '*'
+    tags:
+      - 'v*'
 
 jobs:
   frontend:
@@ -42,8 +44,8 @@ jobs:
     needs: frontend
     strategy:
       matrix:
-        os: [macos, ubuntu, windows]
-    runs-on: ${{ matrix.os }}-latest
+        os: [macos-latest, ubuntu-22.04, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -60,15 +62,15 @@ jobs:
           python-version: '3.11'
 
       - name: Install Dependencies (Host Native)
-        if: matrix.os != 'macos'
+        if: matrix.os != 'macos-latest'
         run: |
           python3 -m venv venv
-          ${{ matrix.os == 'windows' && 'venv\\Scripts\\activate' || 'source venv/bin/activate' }}
+          ${{ matrix.os == 'windows-latest' && 'venv\\Scripts\\activate' || 'source venv/bin/activate' }}
           pip3 install -r requirements.txt
           pip3 install pyinstaller
 
       - name: Install Dependencies (macOS Universal)
-        if: matrix.os == 'macos'
+        if: matrix.os == 'macos-latest'
         run: |
           python3 -m venv venv
           source venv/bin/activate
@@ -83,7 +85,7 @@ jobs:
             pyinstaller
 
       - name: Bundle blivechat (Linux)
-        if: matrix.os == 'ubuntu'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           source venv/bin/activate
           pyinstaller --noconfirm \
@@ -95,7 +97,7 @@ jobs:
             main.py
 
       - name: Bundle blivechat (macOS Universal)
-        if: matrix.os == 'macos'
+        if: matrix.os == 'macos-latest'
         run: |
           source venv/bin/activate
           pyinstaller --noconfirm \
@@ -108,7 +110,7 @@ jobs:
             main.py
 
       - name: Bundle blivechat (Windows)
-        if: matrix.os == 'windows'
+        if: matrix.os == 'windows-latest'
         run: |
           venv\\Scripts\\activate
           pyinstaller --noconfirm `
