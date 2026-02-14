@@ -13,6 +13,7 @@ import * as pronunciation from '@/utils/pronunciation'
 import * as chatConfig from '@/api/chatConfig'
 import * as chat from '@/api/chat'
 import * as chatModels from '@/api/chat/models'
+import * as mainApi from '@/api/main'
 import ChatRenderer from '@/components/ChatRenderer'
 import * as constants from '@/components/ChatRenderer/constants'
 /** @import * as blcsdk from '@/blcsdk' */
@@ -410,8 +411,8 @@ export default {
       this.chatClient.start()
     },
     async initServerEmoticons() {
-      if (this.roomKeyType === 1 && this.roomKeyValue === 4588774) {
-        this.config.emoticons = await (await fetch('/api/emoticons')).json()
+      if (this.roomKeyType === 1) {
+        this.config.emoticons = await mainApi.getEmoticons(this.roomKeyValue)
       }
     },
     async initTextEmoticons() {

@@ -311,6 +311,7 @@ export default {
       if (val !== '' && oldVal !== '') {
         this.showRoomUrlUpdatedTip = true
         this.delayHideRoomUrlUpdatedTip()
+        this.updateEmoticon()
       }
 
       // 保存配置
@@ -469,7 +470,11 @@ export default {
     },
     async updateEmoticon() {
       try {
-        this.form.emoticons = await mainApi.getEmoticons()
+        if (this.form.roomKeyType === 1) {
+          this.form.emoticons = await mainApi.getEmoticons(this.form.roomId)
+        } else {
+          this.form.emoticons = []
+        }
       } catch (e) {
         this.$message.error(`Failed to update emoticons: ${e}`)
         throw e

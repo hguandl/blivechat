@@ -110,9 +110,17 @@ class UploadEmoticonHandler(api.base.ApiHandler):
 
 class EmoticonListHandler(api.base.ApiHandler):
     async def get(self):
-        emoticons_path = os.path.join(config.DATA_PATH, 'emoticons.csv')
+        room_id = self.get_argument("room_id", None)
+        if room_id is None:
+            self.write(json.dumps([]))
+            return
+        if not room_id.isdigit():
+            raise tornado.web.HTTPError(400)
+
+        emoticons_path = os.path.join(config.DATA_PATH, f'{room_id}.csv')
         if not os.path.exists(emoticons_path):
-            raise tornado.web.HTTPError(404)
+            self.write(json.dumps([]))
+            return
 
         emoticons = []
 
