@@ -219,6 +219,8 @@ export default {
 
       pendingMsgIdToPromise: new Map(), // 正在异步处理，渲染器还没收到的消息，用于一些有时序依赖的消息
 
+      emoticonTimer: null, // 定时器，用于定期刷新表情
+
       renderer: null,
     }
   },
@@ -285,6 +287,11 @@ export default {
       this.chatClient.stop()
     }
 
+    if (this.emoticonTimer) {
+      window.clearInterval(this.emoticonTimer)
+      this.emoticonTimer = null
+    }
+
     document.head.removeChild(this.customStyleElement)
     if (this.presetCssLinkElement) {
       document.head.removeChild(this.presetCssLinkElement)
@@ -327,6 +334,10 @@ export default {
         })
         throw e
       }
+
+      this.emoticonTimer = window.setInterval(() => {
+        this.initServerEmoticons()
+      }, 5 * 60 * 1000)
 
       // 提示用户已加载
       this.$message({
